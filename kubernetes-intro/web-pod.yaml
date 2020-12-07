@@ -1,0 +1,26 @@
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: web
+  labels: # Метки в формате key: value
+    app: apache
+spec: # Описание Pod
+  containers: # Описание контейнеров внутри Pod
+  - name: apache
+    image: madjo/kuber:apache
+    volumeMounts:
+      - name: app
+        mountPath: /app
+  initContainers:
+  - name: busybox
+    image: busybox
+    command: ['sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh']
+    volumeMounts:
+      - name: app
+        mountPath: /app
+  volumes:
+  - name: app
+    emptyDir: {}
+
+
+
