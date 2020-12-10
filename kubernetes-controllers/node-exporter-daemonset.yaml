@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: default
+  labels:
+    k8s-app: node-exporter
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter 
+  template:
+    metadata:
+      labels:
+        name: node-exporter
+    spec:
+      tolerations:
+        - key: madjo/kuber:node_exporter
+          effect: NoSchedule
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter
