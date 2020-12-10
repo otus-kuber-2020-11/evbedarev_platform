@@ -8,14 +8,14 @@ spec:
   replicas: 3
   selector:
       matchLabels:
-        run: frontend
+        app: frontend
   template:
     metadata:
       labels:
-        run: frontend
+        app: frontend
     spec:
       containers:
-      - name: server
+      - name: frontend
         image: madjo/kuber:frontend_v0.0.2
         env:
         - name: PRODUCT_CATALOG_SERVICE_ADDR
