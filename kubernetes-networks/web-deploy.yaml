@@ -33,7 +33,7 @@ spec:
       initContainers:
       - name: busybox
         image: busybox
-        command: ['sh', '-c', 'echo "<html><head><title>Hello!</title></head></html>" > /app/index.html']
+        command: ['sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh']
         volumeMounts:
           - name: app
             mountPath: /app
