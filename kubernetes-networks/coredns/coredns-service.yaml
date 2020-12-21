@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coredns-tcp
+  annotations:
+    metallb.universe.tf/allow-shared-ip: eprst
   namespace: kube-system
 spec:
   selector:
@@ -17,6 +19,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coredns-udp
+  annotations:
+    metallb.universe.tf/allow-shared-ip: eprst
   namespace: kube-system
 spec:
   selector:
