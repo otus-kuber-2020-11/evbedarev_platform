@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-canary1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-canary1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+      maxSurge: 100%
+  template:
+    metadata:
+      name: web-canary1
+      labels: # Метки в формате key: value
+        app: web-canary1
+    spec: # Описание Pod
+      containers: # Описание контейнеров внутри Pod
+      - name: apache2
+        image: madjo/kuber:apache
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: 8000
+        livenessProbe:
+          tcpSocket: { port: 8000 }
+        volumeMounts:
+          - name: app
+            mountPath: /app
+      initContainers:
+      - name: busybox
+        image: busybox
+        command: ['sh', '-c', 'echo "<html><head><title>Hello1!</title></head></html>" > /app/index.html']
+        volumeMounts:
+          - name: app
+            mountPath: /app
+      volumes:
+      - name: app
+        emptyDir: {}
+    
