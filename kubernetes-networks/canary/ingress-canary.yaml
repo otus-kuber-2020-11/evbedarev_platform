@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: web-canary1
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-by-header: "canary"
+    nginx.ingress.kubernetes.io/canary-by-header: "Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "one"
 spec:
   rules:
     - http:
         paths:
-        - path: /canary1
+        - path: /canary
           backend:
             serviceName: web-svc-canary1
             servicePort: 80

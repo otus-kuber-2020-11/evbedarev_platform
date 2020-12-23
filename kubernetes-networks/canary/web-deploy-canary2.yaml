@@ -20,7 +20,7 @@ spec:
     spec: # Описание Pod
       containers: # Описание контейнеров внутри Pod
       - name: apache2
-        image: madjo/kuber:apache
+        image: madjo/kuber:apache_canary
         readinessProbe:
           httpGet:
             path: /index.html
