@@ -15,3 +15,4 @@ spec:
             serviceName: web-svc-canary1
             servicePort: 80
 
+
