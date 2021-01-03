@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: web
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: shop.35.224.184.62.nip.io
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: frontend
+            servicePort: {{ .Values.service.port }}
+            
