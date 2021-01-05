@@ -8,9 +8,10 @@ metadata:
     nginx.ingress.kubernetes.io/canary-by-header-value: "second"
 spec:
   rules:
-    - http:
+    - host: nginx.local
+      http:
         paths:
-        - path: /canary
+        - path: /canary/
           backend:
             serviceName: web-svc-canary2
             servicePort: 80
