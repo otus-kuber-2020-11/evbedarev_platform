@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bus
+  template:
+    metadata:
+      labels:
+        app: bus
+    spec:
+      containers:
+      - name: bus
+        image: busybox
+        command: ['sh', '-c', 'echo "<html><body>Hellow</body></html>" >> /app/index.html']
+        volumeMounts:
+          - name: app
+            mountPath: /app
+      volumes:
+      - name: app
+        emptyDir: {}
