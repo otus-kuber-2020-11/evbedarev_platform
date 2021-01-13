@@ -43,7 +43,35 @@
 
 База взята из бэкапа.
 
-## Задание со 🌟 (1) пока не сделал.
+## Задание со 🌟 (1).
+В процедуру msyql_on_create, в try где создается backup_pv добавим создание строковой переменной
+и присвоим значение "Without restore job". После блока try добавим проверку на существование переменной
+и если этой переменной нет, создадим со значением "With restore job"
+```python
+   try:
+        backup_pv = render_template('backup-pv.yml.j2', {'name': name})
+        api = kubernetes.client.CoreV1Api()
+        api.create_persistent_volume(backup_pv)
+        message = "Without restore job"
+    except kubernetes.client.rest.ApiException:
+        pass
+    if 'message' not in locals():
+        message = "With restore job"
+```
+Добавляем в конец процедуры mysql_on_create возврат значения, которое будет отображаться в Event'ах.
+```python
+return {'message': message}
+```
+Теперь после создания объекта в Event'ax появляются сообщения о том как создан этот:
+```bash
+Events:
+  Type     Reason   Age   From  Message
+  ----     ------   ----  ----  -------
+  Normal   Logging  18s   kopf  Creation event is processed: 1 succeeded; 0 failed.
+  Warning  Logging  18s   kopf  Patching failed with inconsistencies: (('remove', ('status',), {'mysql_on_create': {'message': 'Without restore job'}}, None),)
+  Normal   Logging  18s   kopf  Handler 'mysql_on_create' succeeded.
+```
+Только у меня это как-то криво работает
 
 ## Задание со 🌟 (2):
 
