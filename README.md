@@ -147,7 +147,7 @@ MySQL контроллер:
 		+----+-------------+
 	==================================================================================================================
 	Код:
-	
+	```python
 		#меняет пароль от текущей базы
 		
 		def change_curr_pwd(name, password, new_password, database):
@@ -217,7 +217,7 @@ MySQL контроллер:
 
 
 Шаблон change-pwd-job.yml.j2:
-
+```yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -237,14 +237,3 @@ spec:
         - /bin/sh
         - -c
         - mysql -u root -h {{ name }} -p{{ password }} -e " UPDATE mysql.user SET authentication_string=PASSWORD('{{new_password}}') WHERE user='root';FLUSH PRIVILEGES;"  {{ database }}
-
-
-	
-
-		
-
-
-
-
-
-	
