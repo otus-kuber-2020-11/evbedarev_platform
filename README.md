@@ -1,9 +1,8 @@
 Домашнее задание kubernetes-operators:
-
+```bash
 	-	сделал задание  “уткой”
-	
 	-	сделал 2е задание *
-	
+```
 Вопрос: почему объект создался, хотя мы создали CR, до того, как
 
 запустили контроллер?
@@ -59,7 +58,7 @@ Environment:
 	MYSQL_DATABASE:       otus-database
 ```
       
-	 Смотрим в cr.yml
+Смотрим в cr.yml
 ```bash
 password: otuspassword2
 ```
