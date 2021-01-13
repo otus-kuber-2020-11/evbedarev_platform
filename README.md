@@ -21,38 +21,31 @@ MySQL контроллер:
 		
 	
 Посмотрим содержимое таблицы:
-
+```bash
 +----+-------------+
-
 | id | name        |
-
 +----+-------------+
-
 |  1 | some data   |
-
 |  2 | some data-2 |
-
 +----+-------------+
+```
 
-	Удалим mysql-instance:
-	
+Удалим mysql-instance:
+```bash
 	NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                               STORAGECLASS   REASON   AGE
-	
 	backup-mysql-instance-pv                   1Gi        RWO            Retain           Available                                                               154m
-	
+```
+
 Создадим заново mysql-instance:
-
+```bash
 +----+-------------+
-
 | id | name        |
-
 +----+-------------+
-
 |  1 | some data   |
-
 |  2 | some data-2 |
-
 +----+-------------+
+```
+
 База взята из бэкапа.
 
 Задание со 🌟 (1) пока не сделал.
@@ -60,94 +53,71 @@ MySQL контроллер:
 Задание со 🌟 (2):
 
 1. Смотрим текущий пароль пода (kubectl describe pod mysql-instance-75fccbd7f4-zlmxv)
-
-    Environment:
-    
-      MYSQL_ROOT_PASSWORD:  otuspassword2
-      
-      MYSQL_DATABASE:       otus-database
+```bash
+Environment:
+	MYSQL_ROOT_PASSWORD:  otuspassword2
+	MYSQL_DATABASE:       otus-database
+```
       
 	 Смотрим в cr.yml
-	 
-	 	password: otuspassword2
+```bash
+password: otuspassword2
+```
 		
 2. проверяю что база доступна с этим паролем (kubectl exec -it $MYSQLPOD -- mysql -potuspassword2 -e "select * from test;" otus-database):
-
+```bash
 +----+-------------+
-
 | id | name        |
-
 +----+-------------+
-
 |  1 | some data   |
-
 |  2 | some data-2 |
-
 +----+-------------+
-
+```
 3. меняю пароль в cr.yml на otuspassword3
 
 4. применяю. controller log:
-
-	password changed to: otuspassword3
-	
-	job change-mysql-instance-job end without errors
-	
-	delete job: restore-mysql-instance-job
-	
-	job restore-mysql-instance-job end without errors
-	
-	old_pwd value: otuspassword2, new_pwd value: otuspassword3
-	
-	[2021-01-13 18:34:06,905] kopf.objects         [INFO    ] [default/mysql-instance] Handler 'change_handler' succeeded.
-	
-	[2021-01-13 18:34:06,906] kopf.objects         [INFO    ] [default/mysql-instance] Update event is processed: 1 succeeded; 0 failed.
-	
+```bash
+password changed to: otuspassword3
+job change-mysql-instance-job end without errors
+delete job: restore-mysql-instance-job
+job restore-mysql-instance-job end without errors
+old_pwd value: otuspassword2, new_pwd value: otuspassword3
+[2021-01-13 18:34:06,905] kopf.objects         [INFO    ] [default/mysql-instance] Handler 'change_handler' succeeded.
+[2021-01-13 18:34:06,906] kopf.objects         [INFO    ] [default/mysql-instance] Update event is processed: 1 succeeded; 0 failed.
+```
 5. смотрим что с подом:
-
+```bash
 		NAME                               READY   STATUS      RESTARTS   AGE
-		
 		mysql-instance-d9d5f4445-7gtt9     1/1     Running     0          55s
-		
 		restore-mysql-instance-job-6hk9q   0/1     Completed   3          55s
-		
+```
 	Смотри что внутри пода (kubectl describe pod mysql-instance-d9d5f4445-7gtt9):
-	
-		Environment:
-		
-				MYSQL_ROOT_PASSWORD:  otuspassword3
-				
-				MYSQL_DATABASE:       otus-database
-				
+```bash	
+Environment:
+		MYSQL_ROOT_PASSWORD:  otuspassword3
+		MYSQL_DATABASE:       otus-database
+```				
   Смотрим на под restore (kubectl describe pod restore-mysql-instance-job-6hk9q):
-  
-		  Command:
+```bash
+Command:
       /bin/sh
-      
       -c
-      
       mysql -u root -h mysql-instance -potuspassword3 otus-database< /backup-mysql-instance-pv/mysql-instance-dump.sql
-			
+```			
 6. Пытаюсь подключиться с новым паролем:
-
-		mj@debian:~/kubernetes-operators/deploy$ kubectl exec -it $MYSQLPOD -- mysql -potuspassword3 -e "select * from test;" otus-database
-		
-		mysql: [Warning] Using a password on the command line interface can be insecure.
-		
-		+----+-------------+
-		
-		| id | name        |
-		
-		+----+-------------+
-		
-		|  1 | some data   |
-		
-		|  2 | some data-2 |
-		
-		+----+-------------+
+```bash
+mj@debian:~/kubernetes-operators/deploy$ kubectl exec -it $MYSQLPOD -- mysql -potuspassword3 -e "select * from test;" otus-database
+mysql: [Warning] Using a password on the command line interface can be insecure.
++----+-------------+
+| id | name        |
++----+-------------+
+|  1 | some data   |
+|  2 | some data-2 |
++----+-------------+
+```
 	==================================================================================================================
 	Код:
-	```python
+```python
 		#меняет пароль от текущей базы
 		
 		def change_curr_pwd(name, password, new_password, database):
@@ -214,8 +184,7 @@ MySQL контроллер:
 						change_curr_pwd(name, old_password, new_password, database)
 						update_res(name, image, new_password, database, body)
 						print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")
-
-
+```
 Шаблон change-pwd-job.yml.j2:
 ```yaml
 apiVersion: batch/v1
