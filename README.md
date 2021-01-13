@@ -216,8 +216,27 @@ MySQL контроллер:
 						print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")
 
 
+Шаблон change-pwd-job.yml.j2:
 
-
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: default
+  name: change-{{ name }}-job
+spec:
+  template:
+    metadata:
+      name: change-{{ name }}-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: backup
+        image: mysql:5.7
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - mysql -u root -h {{ name }} -p{{ password }} -e " UPDATE mysql.user SET authentication_string=PASSWORD('{{new_password}}') WHERE user='root';FLUSH PRIVILEGES;"  {{ database }}
 
 
 	
