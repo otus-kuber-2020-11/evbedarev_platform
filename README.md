@@ -45,6 +45,13 @@
 
 База взята из бэкапа.
 
+вывод комманды kubectl get jobs:
+```bash
+@:~/evbedarev_platform/kubernetes-operators/deploy$ kubectl get jobs
+NAME                         COMPLETIONS   DURATION   AGE
+backup-mysql-instance-job    1/1           3s         95s
+restore-mysql-instance-job   1/1           73s        79s
+```
 ## Задание со 🌟 (1).
 В процедуру msyql_on_create, в try где создается backup_pv добавим создание строковой переменной
 и присвоим значение "Without restore job". После блока try добавим проверку на существование переменной
