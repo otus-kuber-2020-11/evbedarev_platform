@@ -14,8 +14,8 @@ def wait_until_job_end(jobname):
         for job in jobs.items:
             if job.metadata.name == jobname:
                 if job.status.succeeded == 1:
-                    print(f"job {jobname} end without errors")
                     job_finished = True
+                    print(f"job {jobname} end without errors")
 
 def render_template(filename, vars_dict):
     env = Environment(loader=FileSystemLoader('./templates'))
@@ -34,8 +34,8 @@ def delete_success_jobs(mysql_instance_name):
         if (jobname == f"backup-{mysql_instance_name}-job") or \
                 (jobname == f"restore-{mysql_instance_name}-job"):
             if job.status.succeeded == 1:
-                print(f"{jobname} succeeded")
                 api.delete_namespaced_job(jobname,'default',propagation_policy='Background')
+                print(f"{jobname} succeeded and will be deleted")
     print("End deletion success jobs")
 
 #меняет пароль от текущей базы
@@ -64,10 +64,9 @@ def update_res(name, image, password, database, body):
     apiBatch = kubernetes.client.BatchV1Api()
     print(f"delete job: restore-{name}-job")
     try:
-        #удаляем задание и деплоймент
+        #удаляем деплоймент
         api.delete_namespaced_deployment(name,'default',propagation_policy='Background')
         wait_until_job_end(f"restore-{name}-job")
-        apiBatch.delete_namespaced_job(f"restore-{name}-job",'default',propagation_policy='Background')
     except kubernetes.client.rest.ApiException:
         pass
     #Инициализируем деплоймент с новым паролем
@@ -76,28 +75,25 @@ def update_res(name, image, password, database, body):
         'image': image,
         'password': password,
         'database': database})
-    #Инициализируем задание с новым паролем
-    restore_job = render_template('restore-job.yml.j2', {'name': name,'image': image,'password': password,'database': database})
     kopf.append_owner_reference(deployment, owner=body)
-    kopf.append_owner_reference(restore_job, owner=body)
     #Создаем деплоймент и задание
     try:
         api.create_namespaced_deployment('default', deployment)
         api = kubernetes.client.BatchV1Api()
-        api.create_namespaced_job('default', restore_job)
     except kubernetes.client.rest.ApiException:
         pass
+
 #Запускем функцию change_handler при наступлении события update
 @kopf.on.update('otus.homework', 'v1', 'mysqls')
 def change_handler(body, old, new, diff, **_):
+    old_password = old['spec']['password']
+    new_password = new['spec']['password']
     #если старый пароль отличается от нового то начинаем
     if (old_password != new_password):
         name = body['metadata']['name']
         image = body['spec']['image']
         database = body['spec']['database']
 
-        old_password = old['spec']['password']
-        new_password = new['spec']['password']
         change_curr_pwd(name, old_password, new_password, database)
         update_res(name, image, new_password, database, body)
         print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")    
@@ -105,7 +101,7 @@ def change_handler(body, old, new, diff, **_):
 
 @kopf.on.create('otus.homework', 'v1', 'mysqls')
 # Функция, которая будет запускаться при создании объектов тип MySQL:
-def mysql_on_create(body, spec, **kwargs):
+def mysql_on_create(body, spec,**_):
     name = body['metadata']['name']
     image = body['spec']['image']
     password = body['spec']['password']
@@ -147,22 +143,26 @@ def mysql_on_create(body, spec, **kwargs):
     try:
         api = kubernetes.client.BatchV1Api()
         api.create_namespaced_job('default', restore_job)
+        wait_until_job_end(f"restore-{name}-job")
+        api.delete_namespaced_job(f"restore-{name}-job",'default',propagation_policy='Background')
     except kubernetes.client.rest.ApiException:
         pass
-
     try:
         backup_pv = render_template('backup-pv.yml.j2', {'name': name})
         api = kubernetes.client.CoreV1Api()
         api.create_persistent_volume(backup_pv)
+        message = "Without restore job"
     except kubernetes.client.rest.ApiException:
         pass
+    if 'message' not in locals():
+        message = "With restore job"
     try:
         backup_pvc = render_template('backup-pvc.yml.j2', {'name': name})
         api = kubernetes.client.CoreV1Api()
         api.create_namespaced_persistent_volume_claim('default', backup_pvc)
     except kubernetes.client.rest.ApiException:
         pass
-
+    return {'message': message}
 
 @kopf.on.delete('otus.homework', 'v1', 'mysqls')
 def delete_object_make_backup(body, **kwargs):
@@ -171,12 +171,11 @@ def delete_object_make_backup(body, **kwargs):
     password = body['spec']['password']
     database = body['spec']['database']
     # Cоздаем backup job:
-    delete_success_jobs(name)
     
     api = kubernetes.client.BatchV1Api()
     backup_job = render_template('backup-job.yml.j2', {'name': name,'image': image,'password': password,'database': database})
     api.create_namespaced_job('default', backup_job)
     wait_until_job_end(f"backup-{name}-job")
-
+    delete_success_jobs(name)
     return {'message': "mysql and its children resources deleted"}
 

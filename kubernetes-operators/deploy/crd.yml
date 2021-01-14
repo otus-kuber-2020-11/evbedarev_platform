@@ -15,7 +15,6 @@ spec:
   versions:
   - name: v1
     subresources:
-      # status enables the status subresource.
       status: {}
     schema:
       openAPIV3Schema:
