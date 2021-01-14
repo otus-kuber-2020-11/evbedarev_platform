@@ -142,8 +142,6 @@ def mysql_on_create(body, spec,**_):
     try:
         api = kubernetes.client.BatchV1Api()
         api.create_namespaced_job('default', restore_job)
-        wait_until_job_end(f"restore-{name}-job")
-        api.delete_namespaced_job(f"restore-{name}-job",'default',propagation_policy='Background')
     except kubernetes.client.rest.ApiException:
         pass
     try:
@@ -170,11 +168,11 @@ def delete_object_make_backup(body, **kwargs):
     password = body['spec']['password']
     database = body['spec']['database']
     # Cоздаем backup job:
-    
+    delete_success_jobs(name)
+
     api = kubernetes.client.BatchV1Api()
     backup_job = render_template('backup-job.yml.j2', {'name': name,'image': image,'password': password,'database': database})
     api.create_namespaced_job('default', backup_job)
     wait_until_job_end(f"backup-{name}-job")
-    delete_success_jobs(name)
     return {'message': "mysql and its children resources deleted"}
 
