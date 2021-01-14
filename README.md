@@ -170,7 +170,7 @@ def change_curr_pwd(name, password, new_password, database):
     except kubernetes.client.rest.ApiException:
         pass
 
-#функция на обновление ресурсов с новым паролем(deployment, restore_job)
+#функция на обновление ресурсов с новым паролем(deployment)
 def update_res(name, image, password, database, body):
     api = kubernetes.client.AppsV1Api()
     apiBatch = kubernetes.client.BatchV1Api()
