@@ -66,7 +66,6 @@ def update_res(name, image, password, database, body):
     try:
         #удаляем деплоймент
         api.delete_namespaced_deployment(name,'default',propagation_policy='Background')
-        wait_until_job_end(f"restore-{name}-job")
     except kubernetes.client.rest.ApiException:
         pass
     #Инициализируем деплоймент с новым паролем
