@@ -64,6 +64,13 @@
 ```python
 return {'message': message}
 ```
+Так же в сrd определим subresources status согласно документации kubernetes:
+```yaml
+  versions:
+  - name: v1
+    subresources:
+      status: {}
+```
 Теперь после создания объекта в Event'ax появляются сообщения о том как создан этот:
 ```bash
 Events:
