@@ -1,6 +1,8 @@
 # Домашнее задание kubernetes-operators:
 :white_check_mark: сделал задание  “уткой”
+
 :white_check_mark: сделал 1е задание, но не уверен что верно 🌟
+
 :white_check_mark: сделал 2е задание 🌟
 
 ## MySQL контроллер
@@ -71,7 +73,7 @@ Events:
   Warning  Logging  18s   kopf  Patching failed with inconsistencies: (('remove', ('status',), {'mysql_on_create': {'message': 'Without restore job'}}, None),)
   Normal   Logging  18s   kopf  Handler 'mysql_on_create' succeeded.
 ```
-Только у меня это как-то криво работает
+Только у меня это как-то криво работает. Хотя в примерах kopf return такое прокатывает.
 
 ## Задание со 🌟 (2):
 
