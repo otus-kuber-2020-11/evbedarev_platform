@@ -178,7 +178,6 @@ def update_res(name, image, password, database, body):
     try:
         #удаляем деплоймент
         api.delete_namespaced_deployment(name,'default',propagation_policy='Background')
-        wait_until_job_end(f"restore-{name}-job")
     except kubernetes.client.rest.ApiException:
         pass
     #Инициализируем деплоймент с новым паролем
@@ -209,6 +208,7 @@ def change_handler(body, old, new, diff, **_):
         change_curr_pwd(name, old_password, new_password, database)
         update_res(name, image, new_password, database, body)
         print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")
+
 
 ```
 Шаблон change-pwd-job.yml.j2:
