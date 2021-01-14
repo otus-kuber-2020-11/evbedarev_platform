@@ -150,72 +150,66 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 ```
 ## Код:
 ```python
-		#меняет пароль от текущей базы
-		
-		def change_curr_pwd(name, password, new_password, database):
-				print(f"get name: {name}")
-				#инициализация задания из шаблона, передача параметров
-				change_pwd = render_template('change-pwd-job.yml.j2', {'name': name,'password': password,'new_password': new_password,'database': database})
-				api = kubernetes.client.BatchV1Api()
-				try:
-						#Создаем задание на изменеие пароля
-						api.create_namespaced_job('default', change_pwd)
-				except kubernetes.client.rest.ApiException:
-						pass
-				print(f"password changed to: {new_password}")
-				#Ожидаем пока задание выполниться
-				wait_until_job_end(f"change-{name}-job")
-				try:
-						#Удаляем задание на изменение
-						api.delete_namespaced_job(f"change-{name}-job",'default',propagation_policy='Background')
-				except kubernetes.client.rest.ApiException:
-						pass
+#меняет пароль от текущей базы
+def change_curr_pwd(name, password, new_password, database):
+    print(f"get name: {name}")
+    #инициализация задания из шаблона, передача параметров
+    change_pwd = render_template('change-pwd-job.yml.j2', {'name': name,'password': password,'new_password': new_password,'database': database})
+    api = kubernetes.client.BatchV1Api()
+    try:
+        #Создаем задание на изменеие пароля
+        api.create_namespaced_job('default', change_pwd)
+    except kubernetes.client.rest.ApiException:
+        pass
+    print(f"password changed to: {new_password}")
+    #Ожидаем пока задание выполниться
+    wait_until_job_end(f"change-{name}-job")
+    try:
+        #Удаляем задание на изменение
+        api.delete_namespaced_job(f"change-{name}-job",'default',propagation_policy='Background')
+    except kubernetes.client.rest.ApiException:
+        pass
 
-		#функция на обновление ресурсов с новым паролем(deployment, restore_job)
-		
-		def update_res(name, image, password, database, body):
-				api = kubernetes.client.AppsV1Api()
-				apiBatch = kubernetes.client.BatchV1Api()
-				print(f"delete job: restore-{name}-job")
-				try:
-						#удаляем задание и деплоймент
-						api.delete_namespaced_deployment(name,'default',propagation_policy='Background')
-						wait_until_job_end(f"restore-{name}-job")
-						apiBatch.delete_namespaced_job(f"restore-{name}-job",'default',propagation_policy='Background')
-				except kubernetes.client.rest.ApiException:
-						pass
-				#Инициализируем деплоймент с новым паролем
-				deployment = render_template('mysql-deployment.yml.j2', {
-						'name': name,
-						'image': image,
-						'password': password,
-						'database': database})
-				#Инициализируем задание с новым паролем
-				restore_job = render_template('restore-job.yml.j2', {'name': name,'image': image,'password': password,'database': database})
-				kopf.append_owner_reference(deployment, owner=body)
-				kopf.append_owner_reference(restore_job, owner=body)
-				#Создаем деплоймент и задание
-				try:
-						api.create_namespaced_deployment('default', deployment)
-						api = kubernetes.client.BatchV1Api()
-						api.create_namespaced_job('default', restore_job)
-				except kubernetes.client.rest.ApiException:
-						pass
-						
-		#Запускем функцию change_handler при наступлении события update
-		@kopf.on.update('otus.homework', 'v1', 'mysqls')
-		def change_handler(body, old, new, diff, **_):
-				old_password = old['spec']['password']
-				new_password = new['spec']['password']
-				#если старый пароль отличается от нового то начинаем
-				if (old_password != new_password):
-						name = body['metadata']['name']
-						image = body['spec']['image']
-						database = body['spec']['database']
+#функция на обновление ресурсов с новым паролем(deployment, restore_job)
+def update_res(name, image, password, database, body):
+    api = kubernetes.client.AppsV1Api()
+    apiBatch = kubernetes.client.BatchV1Api()
+    print(f"delete job: restore-{name}-job")
+    try:
+        #удаляем деплоймент
+        api.delete_namespaced_deployment(name,'default',propagation_policy='Background')
+        wait_until_job_end(f"restore-{name}-job")
+    except kubernetes.client.rest.ApiException:
+        pass
+    #Инициализируем деплоймент с новым паролем
+    deployment = render_template('mysql-deployment.yml.j2', {
+        'name': name,
+        'image': image,
+        'password': password,
+        'database': database})
+    kopf.append_owner_reference(deployment, owner=body)
+    #Создаем деплоймент и задание
+    try:
+        api.create_namespaced_deployment('default', deployment)
+        api = kubernetes.client.BatchV1Api()
+    except kubernetes.client.rest.ApiException:
+        pass
 
-						change_curr_pwd(name, old_password, new_password, database)
-						update_res(name, image, new_password, database, body)
-						print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")
+#Запускем функцию change_handler при наступлении события update
+@kopf.on.update('otus.homework', 'v1', 'mysqls')
+def change_handler(body, old, new, diff, **_):
+    old_password = old['spec']['password']
+    new_password = new['spec']['password']
+    #если старый пароль отличается от нового то начинаем
+    if (old_password != new_password):
+        name = body['metadata']['name']
+        image = body['spec']['image']
+        database = body['spec']['database']
+
+        change_curr_pwd(name, old_password, new_password, database)
+        update_res(name, image, new_password, database, body)
+        print(f"old_pwd value: {old_password}, new_pwd value: {new_password}")
+
 ```
 Шаблон change-pwd-job.yml.j2:
 ```yaml
