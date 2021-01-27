@@ -7,8 +7,7 @@
 ... А так же контейнер с nginx-exporter собирает метрики с порта 8081, плюс Service для nginx-exporter
 ... Устанавливаем деплоймент и севис.
 ## Prometheus
-3. Клонирую репозиторий [prometheus-operator][1]
-[1]: https://github.com/prometheus-operator/kube-prometheus
+3. Клонирую репозиторий [prometheus-operator](https://github.com/prometheus-operator/kube-prometheus "prometheus-operator")
 4. Устанавливаю:
 ```bash
 kubectl create -f manifests/setup
@@ -16,3 +15,6 @@ kubectl create -f manifests/
 ```
 5. В ServiceMonitor указываю matchLabels: nameapp: nginx-exporter.
 6. с помощью kubectl port-forward лезем на localhost:9090. И наблюдаем target: node-exporter
+## Grafana
+График:
+![grafana](‪C:\Users\mj\Pictures\grafana.jpg)
