@@ -17,4 +17,4 @@ kubectl create -f manifests/
 6. с помощью kubectl port-forward лезем на localhost:9090. И наблюдаем target: node-exporter
 ## Grafana
 График:
-![grafana](./kubernetes-monitoring/images/grafana.jpg)
+![grafana](./images/grafana.jpg)
