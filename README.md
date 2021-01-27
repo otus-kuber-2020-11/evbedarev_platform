@@ -239,3 +239,30 @@ spec:
         - /bin/sh
         - -c
         - mysql -u root -h {{ name }} -p{{ password }} -e " UPDATE mysql.user SET authentication_string=PASSWORD('{{new_password}}') WHERE user='root';FLUSH PRIVILEGES;"  {{ database }}
+```
+# Домашнее задание kubernetes-monitoring:
+___Уровень: Bring`em on!___
+## Dockerfile
+1. Создал Dockerfile. Взял базовый  образ Centos 7 , установил nginx.
+- Были проблемы с передачей переменной в конфиг nginx. Получилось решить с помощью envsubst.
+## Nginx & Nginx exporter
+2. Создал деплоймент с тремя контейнерами nginx, порты передаються с помощью env.
+- А так же контейнер с nginx-exporter собирает метрики с порта 8081, плюс Service для nginx-exporter
+- Устанавливаем деплоймент и севис.
+## Prometheus
+3. Клонирую репозиторий [prometheus-operator](https://github.com/prometheus-operator/kube-prometheus "prometheus-operator")
+4. Устанавливаю:
+```bash
+kubectl create -f manifests/setup
+kubectl create -f manifests/
+```
+5. В ServiceMonitor указываю matchLabels: nameapp: nginx-exporter.
+6. с помощью kubectl port-forward лезем на localhost:9090. И наблюдаем target: node-exporter
+
+## Prometheus
+![prometheus](./kubernetes-monitoring/images/prometheus.jpg)
+
+## Grafana
+График:
+![grafana](./kubernetes-monitoring/images/grafana.jpg)
+
