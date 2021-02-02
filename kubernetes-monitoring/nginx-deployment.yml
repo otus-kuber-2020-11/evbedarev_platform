@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    nameapp: nginx-exporter
+    #namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx1
+          image: madjo/kuber:nginx-mon-v2
+          env:
+            - name: CUSTOM_PORT_NGINX
+              value: "8081"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+
+        - name: nginx2
+          image: madjo/kuber:nginx-mon-v2
+          env:
+            - name: CUSTOM_PORT_NGINX
+              value: "8082"
+          ports:
+            - containerPort: 8082
+              protocol: TCP
+
+        - name: nginx3
+          image: madjo/kuber:nginx-mon-v2
+          env:
+            - name: CUSTOM_PORT_NGINX
+              value: "8083"
+          ports:
+            - containerPort: 8083
+              protocol: TCP
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.3.0
+          ports:
+          - name: nginx-exporter
+            containerPort: 9113
+          args:
+            - -nginx.scrape-uri=http://127.0.0.1:8081/basic_status
