@@ -1,0 +1,29 @@
+backend:
+  type: es
+  es:
+    host: elasticsearch-master
+
+rawConfig: |-
+  @INCLUDE fluent-bit-service.conf
+  @INCLUDE fluent-bit-input.conf
+  [INPUT]
+    Name             tail
+    Path             /var/log/containers/nginx*.log
+    Parser           docker
+    Tag              nginx.*
+    Refresh_Interval 5
+    Mem_Buf_Limit    10MB
+    Skip_Long_Lines  On`
+  @INCLUDE fluent-bit-filter.conf
+  [FILTER]
+    Name    modify
+    Match   *
+    Remove  time
+    Remove  @timestamp
+  @INCLUDE fluent-bit-output.conf
+
+tolerations:
+  - key: node-role
+    operator: Equal
+    value: infra
+    effect: NoSchedule

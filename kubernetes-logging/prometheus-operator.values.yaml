@@ -1,0 +1,113 @@
+prometheus:
+  prometheusSpec:
+    tolerations:
+      - key: node-role
+        operator: Equal
+        value: infra
+        effect: NoSchedule
+    serviceMonitorSelectorNilUsesHelmValues: false
+    #    serviceMonitorNamespaceSelector:
+    #      matchLabels:
+    #        app.kubernetes.io/instance: nginx-ingress
+
+grafana:
+  enabled: true
+  namespaceOverride: ""
+
+  ## Deploy default dashboards.
+  ##
+  defaultDashboardsEnabled: true
+
+  adminPassword: prom-operator
+  ingress:
+   ## If true, Grafana Ingress will be created
+   ##
+   enabled: true
+
+   ## Annotations for Grafana Ingress
+   ##
+   annotations: {
+     kubernetes.io/ingress.class: nginx
+     }
+   
+     # kubernetes.io/ingress.class: nginx
+     # kubernetes.io/tls-acme: "true"
+
+   ## Labels to be added to the Ingress
+   ##
+   labels: {}
+
+   ## Hostnames.
+   ## Must be provided if Ingress is enable.
+   ##
+   # hosts:
+   #   - grafana.domain.com
+   hosts: 
+      - grafana.35.202.86.50.xip.io
+
+
+
+   ## Path for grafana ingress
+   path: /
+
+   ## TLS configuration for grafana Ingress
+   ## Secret must be manually created in the namespace
+   ##
+   tls: []
+   # - secretName: grafana-general-tls
+   #   hosts:
+   #   - grafana.example.com
+
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+
+      ## Annotations for Grafana dashboard configmaps
+      ##
+      annotations: {}
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: true
+
+      ## Annotations for Grafana datasource configmaps
+      ##
+      annotations: {}
+
+      ## Create datasource for each Pod of Prometheus StatefulSet;
+      ## this uses headless service `prometheus-operated` which is
+      ## created by Prometheus Operator
+      ## ref: https://git.io/fjaBS
+      createPrometheusReplicasDatasources: false
+      label: grafana_datasource
+
+  extraConfigmapMounts: []
+  # - name: certs-configmap
+  #   mountPath: /etc/grafana/ssl/
+  #   configMap: certs-configmap
+  #   readOnly: true
+
+  ## Configure additional grafana datasources (passed through tpl)
+  ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+  additionalDataSources: 
+   - name: loki
+  #   access: proxy
+  #   basicAuth: true
+  #   basicAuthPassword: pass
+  #   basicAuthUser: daco
+  #   editable: false
+  #   jsonData:
+  #       tlsSkipVerify: true
+  #   orgId: 1
+     type: loki
+     url: http://loki.observability.svc.cluster.local:3100/
+  #   version: 1
+
+  ## Passed to grafana subchart and used by servicemonitor below
+  ##
+  #
+  # prometheusSpec:
+  #   serviceMonitorSelector:
+  #      matchLabels:
+  #        app.kubernetes.io/instance: nginx-ingress
+    
