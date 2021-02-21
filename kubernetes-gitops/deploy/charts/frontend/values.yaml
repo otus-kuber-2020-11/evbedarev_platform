@@ -1,0 +1,6 @@
+image:
+  repository: madjo/kuber_frontend
+  tag: v0.0.1
+ingress:
+  host: develop.kubernetes-platform-demo.express42.io
+environment: develop
