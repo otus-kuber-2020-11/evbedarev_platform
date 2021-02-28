@@ -1,8 +1,0 @@
-image:
-  repository: madjo/kuber_cartservice
-  tag: latest
-
-redis:
-  cluster:
-    enabled: false
-  usePassword: false
