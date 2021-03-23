@@ -21,14 +21,16 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx-storage
+  name: alpine-storage
 spec:
   containers:
-  - name: nginx-storage
-    image: nginx:stable
+  - name: alpine-storage
+    image: alpine
     volumeMounts:
     - name: data
       mountPath: "/data"
+    command: ["/bin/sh"]
+    args: ["-c","sleep 500000"]
   volumes:
   - name: data
     persistentVolumeClaim:
