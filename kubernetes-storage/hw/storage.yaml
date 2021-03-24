@@ -21,10 +21,10 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: alpine-storage
+  name: storage-pod
 spec:
   containers:
-  - name: alpine-storage
+  - name: storage-pod
     image: alpine
     volumeMounts:
     - name: data
