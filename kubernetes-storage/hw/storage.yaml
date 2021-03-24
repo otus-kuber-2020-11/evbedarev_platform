@@ -1,17 +1,9 @@
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: sc-csi-hostpath
-provisioner: hostpath.csi.k8s.io
-volumeBindingMode: Immediate 
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: storage-pvc
 spec:
-  storageClassName: sc-csi-hostpath
+  storageClassName: csi-hostpath-sc
   accessModes:
     - ReadWriteOnce
   resources:
