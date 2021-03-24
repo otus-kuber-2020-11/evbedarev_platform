@@ -9,7 +9,7 @@ volumeBindingMode: Immediate
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-csi
+  name: storage-pvc
 spec:
   storageClassName: sc-csi-hostpath
   accessModes:
@@ -34,4 +34,4 @@ spec:
   volumes:
   - name: data
     persistentVolumeClaim:
-      claimName: pvc-csi
+      claimName: storage-pvc
