@@ -4,7 +4,7 @@ kind: StorageClass
 metadata:
   name: sc-csi-hostpath
 provisioner: hostpath.csi.k8s.io
-volumeBindingMode: Immediate
+volumeBindingMode: Immediate 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -34,5 +34,4 @@ spec:
   volumes:
   - name: data
     persistentVolumeClaim:
-      claimName: storage-pvc
-
+      claimName: pvc-csi
